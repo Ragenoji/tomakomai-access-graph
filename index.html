@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>データグラフ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <style>
+    .chart-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-container">
+    <canvas id="ponytailAccessChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="ponytailReviewChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="myGirlChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="photoDiaryChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="myShopChart"></canvas>
+  </div>
+  <div class="chart-container">
+    <canvas id="pyurabbaChart"></canvas>
+  </div>
+
+  <script>
+    const labels = ['2月下旬', '3月上旬', '3月下旬', '4月上旬', '4月下旬', '5月上旬', '5月下旬', '6月上旬', '6月下旬','7月上旬'];
+
+    const ponytailAccessData = [10638, 9699, 8959, 10707, 11774, 12603 ,13414,15280,14759];
+    const ponytailReviewData = [70, 88, 94, 107, 126, 134, 157, 172, 184];
+    const myGirlData = [11059, 12180, 12832, 14158, 15380, 16559, 18375, 19957, 21469];
+    const photoDiaryData = [21, 26, 27, 31, 31, 40, 44, 41, 38];
+    const myShopData = [431, 469, 491, 523, 588, 635, 699, 751, 791];
+
+    const pyurabbaData = [11, 16, 23, 29, 40, 45, 57, 63, 69];
+    const stationChikaData = [43, 49, 76, 95, 122, 130, 147, 160, 171];
+    const deliJapData = [12, 17, 26, 33, 35, 36, 49, 55, 73];
+    const fuzokuJapanData = [7, 13, 21, 18, 24, 27, 37, 46, 50];
+
+    const chichikuritaiAccessData = [0, 0, 0, 0, 0, 0, 0, 0, 2886];
+    const chichikuritaiReviewData = [0, 0, 0, 0, 0, 0, 0, 0, 2];
+    const chichikuritaiMyGirlData = [0, 0, 0, 0, 0, 0, 0, 0, 337];
+    const chichikuritaiPhotoDiaryData = [0, 0, 0, 0, 0, 0, 0, 0, 13];
+    const chichikuritaiMyShopData = [0, 0, 0, 0, 0, 0, 0, 0, 51];
+
+    const castAttendanceData = [4.6, 4.5, 4.3, 4.4, 3.6, 5.9, 4.8, 6.2, 6.4];
+    const chichikuritaiCastAttendanceData = [0, 0, 0, 0, 0, 0, 0, 0, 1.6];
+
+    function createDataset(label, data, borderColor, pointBackgroundColor, type='line', isCastAttendance=false) {
+      return {
+        label: label,
+        data: data,
+        type: type,
+        fill: false,
+        borderColor: borderColor,
+        borderWidth: 2,
+        pointBackgroundColor: pointBackgroundColor,
+        backgroundColor: borderColor,
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => isCastAttendance ? value.toFixed(1) : value
+        }
+      };
+    }
+
+    const chartOptions = {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const index = context.dataIndex;
+              const currentValue = context.raw;
+              const previousValue = index > 0 ? context.dataset.data[index - 1] : currentValue;
+              const difference = currentValue - previousValue;
+              return `${context.dataset.label}: ${currentValue.toFixed(1)} (${difference >= 0 ? '+' : ''}${difference.toFixed(1)})`;
+            }
+          }
+        },
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          offset: 10
+        }
+      },
+      responsive: true
+    };
+
+    Chart.register(ChartDataLabels);
+
+    function createChart(ctx, datasets) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        options: chartOptions
+      });
+    }
+
+    const ponytailAccessCtx = document.getElementById('ponytailAccessChart').getContext('2d');
+    const ponytailAccessDatasets = [
+      createDataset('ポニーテールアクセス', ponytailAccessData, 'rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'),
+      createDataset('チチくりたいアクセス', chichikuritaiAccessData, 'rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)')
+    ];
+    createChart(ponytailAccessCtx, ponytailAccessDatasets);
+
+    const ponytailReviewCtx = document.getElementById('ponytailReviewChart').getContext('2d');
+    const ponytailReviewDatasets = [
+      createDataset('ポニーテール口コミ数', ponytailReviewData, 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.5)'),
+      createDataset('チチくりたい口コミ数', chichikuritaiReviewData, 'rgba(255, 206, 86, 1)', 'rgba(255, 206, 86, 0.5)')
+    ];
+    createChart(ponytailReviewCtx, ponytailReviewDatasets);
+
+    const myGirlCtx = document.getElementById('myGirlChart').getContext('2d');
+    const myGirlDatasets = [
+      createDataset('ポニーテールマイガール', myGirlData, 'rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'),
+      createDataset('チチくりたいマイガール', chichikuritaiMyGirlData, 'rgba(255, 159, 64, 1)', 'rgba(255, 159, 64, 0.5)')
+    ];
+    createChart(myGirlCtx, myGirlDatasets);
+
+    const photoDiaryCtx = document.getElementById('photoDiaryChart').getContext('2d');
+    const photoDiaryDatasets = [
+      createDataset('ポニーテール写メ日記', photoDiaryData, 'rgba(255, 206, 86, 1)', 'rgba(255, 206, 86, 0.5)'),
+      createDataset('チチくりたい写メ日記', chichikuritaiPhotoDiaryData, 'rgba(153, 102, 255, 1)', 'rgba(153, 102, 255, 0.5)')
+    ];
+    const castAttendanceDataset = createDataset('ポニーテール出勤人数（平均）', castAttendanceData, 'rgba(255, 159, 64, 1)', 'rgba(255, 159, 64, 0.5)', 'bar', true);
+    const chichikuritaiCastAttendanceDataset = createDataset('チチくりたい出勤人数（平均）', chichikuritaiCastAttendanceData, 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.5)', 'bar', true);
+    new Chart(photoDiaryCtx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [castAttendanceDataset, chichikuritaiCastAttendanceDataset, ...photoDiaryDatasets]
+      },
+      options: chartOptions
+    });
+
+    const myShopCtx = document.getElementById('myShopChart').getContext('2d');
+    const myShopDatasets = [
+      createDataset('ポニーテールマイショップ', myShopData, 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.5)'),
+      createDataset('チチくりたいマイショップ', chichikuritaiMyShopData, 'rgba(255, 159, 64, 1)', 'rgba(255, 159, 64, 0.5)')
+    ];
+    createChart(myShopCtx, myShopDatasets);
+
+    const pyurabbaCtx = document.getElementById('pyurabbaChart').getContext('2d');
+    const pyurabbaDatasets = [
+      createDataset('ぴゅあらば口コミ', pyurabbaData, 'rgba(153, 102, 255, 1)', 'rgba(153, 102, 255, 0.5)', 'line'),
+      createDataset('駅チカ口コミ', stationChikaData, 'rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)', 'line'),
+      createDataset('デリヘルジャパン口コミ', deliJapData, 'rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)', 'line'),
+      createDataset('風俗ジャパン口コミ', fuzokuJapanData, 'rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.5)', 'line')
+    ];
+    createChart(pyurabbaCtx, pyurabbaDatasets);
+  </script>
+</body>
+</html>
